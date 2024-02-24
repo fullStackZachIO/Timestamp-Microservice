@@ -1,8 +1,6 @@
 // index.js
 // where your node app starts
 // require('dotenv').config();
-let bodyParser = require('body-parser');
-const res = require('express/lib/response');
 
 
 // init project
@@ -22,9 +20,6 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
-app.use(
-  bodyParser.urlencoded({extended: false})
-);
 
 // your first API endpoint... 
 app.get("/api/hello", function (req, res) {
@@ -44,21 +39,24 @@ app.get('/api/:date?', function(req, res, next) {
     date = new Date(parseInt(dateString));
   }
   if (isNaN(date.getTime())) {
-    req.errored = true;
+    console.log(date);
+    console.log(date + " is not a valid date.");
+    req.time = {error: "Invalid Date"};
+    next();
   } else {
     req.time = {
       utc: date.toUTCString(),
       unix: date.getTime()
     };
     req.errored = false;
+    next();
   }
-
-  next();
 }, function(req, res) {
-  if (!req.errored) {
+  if (req.errored === true) {
+    console.log("Invalid date error json");
     res.json(req.time);
   } else {
-    res.json({"error": "Invalid Date"});
+    res.json(req.time);
   }
 });
 
